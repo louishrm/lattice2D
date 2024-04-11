@@ -129,36 +129,6 @@ class Lattice2D:
         return r
     
 
-    def adjacency_matrix(self,sites=None, tol = 1.1):
-        """Get the adjacency matrix of the supercell.
-        
-        Args:
-            sites: numpy ndarray of shape (M,2) containing the fractional coordinates of the sites in the supercell, by default,
-            it is set to self.sites.
-
-            tol: float, the tolerance for the distance between two sites to be considered as first neighbors (used to avoid
-            small numerical errors). By default, it is set to 1.1 (10 percent).
-        
-        Returns:
-            adM: numpy ndarray of shape (M,M) containing the adjacency matrix of the supercell. The elements i,j of the
-            adjacency matrix are 1 if the sites i and j are first neighbors, and 0 otherwise.
-        """
-        if sites is None:
-            sites = self.sites
-
-        adM = np.zeros((self.M, self.M)) #define the matrix 
-        #loop through the distinct pairs of sites
-        for i,ri in enumerate(sites): 
-            for j,rj in enumerate(sites):
-                #check if the sites are distinct and if the distance between them is less than the first neighbor distance
-                if i!=j and self.periodic_distance(ri,rj) < 1.1*self.first_neighbor_distance:
-                    adM[i,j] = 1
-                else:
-                    adM[i,j] = 0
-
-        return adM
-    
-
     def distance_matrix(self,sites=None):
         """Get the distance matrix of the supercell.
         
@@ -173,19 +143,29 @@ class Lattice2D:
         if sites is None:
             sites = self.sites
         
-        graph = nx.from_numpy_array(self.adjacency_matrix(sites)) #construct a graph from the adjacency matrix
-        path_lengths = dict(nx.all_pairs_dijkstra_path_length(graph)) #compute the shortest path lengths between all pairs of sites
-
-        #construct the distance matrix
+        #first, get the unique distances supported by the supercell
         D = np.zeros((self.M, self.M))
         for i in range(self.M):
-            for j in range(self.M):
-                D[i, j] = path_lengths[i][j]
+            for j in range(i+1, self.M):
+                dist = self.periodic_distance(sites[i], sites[j])
+                D[i,j] = D[j,i] = round(dist,3)
+
+        unique_distances = np.sort(np.unique(D))
+        
+        #create a dictionary mapping the distances to their ranks
+        distance_to_rank = {round(dist, 3): rank for rank, dist in enumerate(unique_distances, start=0)}
+
+        #create the distance matrix
+        D = np.zeros((self.M, self.M))
+        for i in range(self.M):
+            for j in range(i+1, self.M):
+                dist = self.periodic_distance(sites[i], sites[j])
+                D[i,j] = D[j,i] = distance_to_rank[round(dist, 3)]
 
         return D
 
 
-    def lattice_sites_real(self,sites=None):
+    def sites_real(self,sites=None):
         """Get the real space coordinates of the sites in the supercell.
         
         Args:
