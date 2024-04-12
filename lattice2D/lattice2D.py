@@ -31,6 +31,7 @@ class Lattice2D:
         self.nac = len(atom_coords) #number of atoms in the unit cell
         self.M = self.nuc*self.nac #number of sites in the supercell
         self.sites = self.construct_supercell()
+        #self.sites_real = self.sites_real(sites)
 
 
         #get the first neighbor distance
@@ -71,8 +72,6 @@ class Lattice2D:
         for i in range(-a1max, a1max+1):
             for j in range(-a2max, a2max+1):
                 for coords in self.atom_coords:
-                    #x,y = coords
-                    #x,y = x+i, y+j
                     r = coords + np.array([i,j])
                     a,b = self.supercell_expansion(r)
                     if a>=0 and a<1 and b>=0 and b<1: #finds the sites in the parallelogram spanned by A1 and A2
@@ -107,11 +106,10 @@ class Lattice2D:
         Returns:
             distance: float, the periodic distance between the two points.
         """
-        diff = r2-r1 #difference vector
-        a,b = self.supercell_expansion(diff) #supercell expansion coefficients
-        a,b = a-np.rint(a), b-np.rint(b) #minimum image convention
-        distance = np.linalg.norm(a*self.A1 + b*self.A2) #distance
-        return distance
+        A1,A2 = np.array([self.m1, self.n1]), np.array([self.m2, self.n2])
+        to_check = [r1,r1+A1,r1+A2, r1+A1+A2]
+        distances = [self.distance(r, r2) for r in to_check]
+        return min(distances)
 
   
     def periodic_site(self, r):
@@ -148,19 +146,19 @@ class Lattice2D:
         for i in range(self.M):
             for j in range(i+1, self.M):
                 dist = self.periodic_distance(sites[i], sites[j])
-                D[i,j] = D[j,i] = round(dist,3)
+                D[i,j] = D[j,i] = round(dist,5)
 
         unique_distances = np.sort(np.unique(D))
         
         #create a dictionary mapping the distances to their ranks
-        distance_to_rank = {round(dist, 3): rank for rank, dist in enumerate(unique_distances, start=0)}
+        distance_to_rank = {round(dist, 5): rank for rank, dist in enumerate(unique_distances, start=0)}
 
         #create the distance matrix
         D = np.zeros((self.M, self.M))
         for i in range(self.M):
             for j in range(i+1, self.M):
                 dist = self.periodic_distance(sites[i], sites[j])
-                D[i,j] = D[j,i] = distance_to_rank[round(dist, 3)]
+                D[i,j] = D[j,i] = distance_to_rank[round(dist, 5)]
 
         return D
 
@@ -178,10 +176,10 @@ class Lattice2D:
         if sites is None:
             sites = self.sites
 
-        sites_real = []
-        for (x,y) in sites:
+        sites_real = np.zeros((self.M,2))
+        for i,(x,y) in enumerate(sites):
             r = x*self.a1 + y*self.a2
-            sites_real.append((r[0], r[1])) 
+            sites_real[i]=r
         return sites_real
     
 
@@ -242,4 +240,7 @@ class Lattice2D:
 
 
 
-        
+#diff = r2-r1 #difference vector
+#a,b = self.supercell_expansion(diff) #supercell expansion coefficients
+#a,b = a-np.rint(a), b-np.rint(b) #minimum image convention
+#distance = np.linalg.norm(a*self.A1 + b*self.A2) #distance
