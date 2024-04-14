@@ -30,16 +30,7 @@ class Lattice2D:
         self.nac = len(atom_coords) #number of atoms in the unit cell
         self.M = self.nuc*self.nac #number of sites in the supercell
         self.sites = self.construct_supercell()
-        #self.sites_real = self.sites_real(sites)
 
-
-        #get the first neighbor distance
-        if self.nac == 1:
-            self.first_neighbor_distance = min(np.linalg.norm(self.a1), 
-                                               np.linalg.norm(self.a2))
-
-        else:
-            self.first_neighbor_distance=min([self.distance(self.atom_coords[0], self.atom_coords[i]) for i in range(1, self.nac)])
             
 
     def supercell_expansion(self, r):
