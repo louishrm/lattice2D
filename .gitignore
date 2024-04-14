@@ -1,5 +1,6 @@
 *
 !./lattice2D/__init__.py
 !./lattice2D/lattice2D.py
-./lattice_test.ipynb
-./README.MD
+!./lattice_test.ipynb
+!./README.MD
+!./lattice2D/setup.py
