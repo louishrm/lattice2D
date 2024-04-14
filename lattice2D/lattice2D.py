@@ -97,8 +97,8 @@ class Lattice2D:
             distance: float, the periodic distance between the two points.
         """
         A1,A2 = np.array([self.m1, self.n1]), np.array([self.m2, self.n2])
-        vectors = [np.zeros_like(A1), A1,A2, A1+A2, -A1, -A2, -A1-A2, A1-A2, -A1+A2]
-        dist = min([self.distance(r1+v, r2) for v in vectors])  
+        vectors_to_check = [np.zeros_like(A1), A1,A2, A1+A2, -A1, -A2, -A1-A2, A1-A2, -A1+A2]
+        dist = min([self.distance(r1+v, r2) for v in vectors_to_check])  
         return dist
 
   
