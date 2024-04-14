@@ -225,12 +225,3 @@ class Lattice2D:
         ax.set_yticklabels([])
         ax.set_xticks([])
         ax.set_yticks([])
-
-
-
-
-
-#diff = r2-r1 #difference vector
-#a,b = self.supercell_expansion(diff) #supercell expansion coefficients
-#a,b = a-np.rint(a), b-np.rint(b) #minimum image convention
-#distance = np.linalg.norm(a*self.A1 + b*self.A2) #distance
