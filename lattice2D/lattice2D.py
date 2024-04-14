@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
-import networkx as nx
 
 class Lattice2D:
     """A class to represent a 2D lattice.
